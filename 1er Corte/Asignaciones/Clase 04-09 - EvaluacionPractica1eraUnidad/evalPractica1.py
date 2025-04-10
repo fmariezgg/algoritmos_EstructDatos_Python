@@ -1,3 +1,10 @@
+"""
+Miercoles 9 abril 2025
+Fatima Marie Zogaib
+Andres Ernesto Castillo
+Version 1
+"""
+
 from modelos import Estudiante
 from funcionesAuxiliares import mostrar_menu, validar_entero, validar_calificacion, buscar_estudiante
 
