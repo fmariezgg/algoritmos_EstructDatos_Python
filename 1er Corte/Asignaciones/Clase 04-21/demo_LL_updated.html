@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Visual Linked List</title>
+  <style>
+    canvas {
+      border: 1px solid black;
+      margin-top: 20px;
+    }
+    input, button {
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Lista Enlazada Visual</h2>
+  <input type="text" id="value" placeholder="Valor">
+  <input type="number" id="position" placeholder="Posición">
+  <button onclick="insertAtBeginning()">Insertar al Inicio</button>
+  <button onclick="insertAtEnd()">Insertar al Final</button>
+  <button onclick="insertAtPosition()">Insertar en Posición</button>
+  <button onclick="deleteAtPosition()">Eliminar en Posición</button>
+
+  <canvas id="canvas" width="1000" height="300"></canvas>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const nodeWidth = 60;
+    const nodeHeight = 40;
+    const spacing = 100;
+
+    class Nodo {
+      constructor(valor, direccion) {
+        this.valor = valor;
+        this.direccion = direccion;
+        this.siguiente = null;
+      }
+    }
+
+    class ListaEnlazada {
+      constructor() {
+        this.head = null;
+        this.length = 0;
+      }
+
+      insertarInicio(valor) {
+        const nuevoNodo = new Nodo(valor, this.length);
+        nuevoNodo.siguiente = this.head;
+        this.head = nuevoNodo;
+        this.length++;
+        this.actualizarDirecciones();
+        this.dibujar();
+      }
+
+      insertarFinal(valor) {
+        const nuevoNodo = new Nodo(valor, this.length);
+        if (!this.head) {
+          this.head = nuevoNodo;
+        } else {
+          let actual = this.head;
+          while (actual.siguiente) {
+            actual = actual.siguiente;
+          }
+          actual.siguiente = nuevoNodo;
+        }
+        this.length++;
+        this.actualizarDirecciones();
+        this.dibujar();
+      }
+
+      insertarEnPosicion(valor, posicion) {
+        if (posicion < 1 || posicion > this.length + 1) return alert("Posición inválida");
+        if (posicion === 1) return this.insertarInicio(valor);
+
+        const nuevoNodo = new Nodo(valor, this.length);
+        let actual = this.head;
+        let previo = null;
+        for (let i = 1; i < posicion; i++) {
+          previo = actual;
+          actual = actual.siguiente;
+        }
+        nuevoNodo.siguiente = actual;
+        previo.siguiente = nuevoNodo;
+        this.length++;
+        this.actualizarDirecciones();
+        this.dibujar();
+      }
+
+      eliminarEnPosicion(posicion) {
+        if (posicion < 1 || posicion > this.length) return alert("Posición inválida");
+        if (posicion === 1) {
+          this.head = this.head.siguiente;
+        } else {
+          let actual = this.head;
+          let previo = null;
+          for (let i = 1; i < posicion; i++) {
+            previo = actual;
+            actual = actual.siguiente;
+          }
+          previo.siguiente = actual.siguiente;
+        }
+        this.length--;
+        this.actualizarDirecciones();
+        this.dibujar();
+      }
+
+      actualizarDirecciones() {
+        let actual = this.head;
+        let i = 0;
+        while (actual) {
+          actual.direccion = i;
+          i++;
+          actual = actual.siguiente;
+        }
+      }
+
+      dibujar() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let actual = this.head;
+        let x = 50;
+        let y = 100;
+
+        while (actual) {
+          ctx.strokeRect(x, y, nodeWidth, nodeHeight);
+          ctx.beginPath();
+          ctx.moveTo(x + nodeWidth / 2, y);
+          ctx.lineTo(x + nodeWidth / 2, y + nodeHeight);
+          ctx.stroke();
+
+          ctx.fillText(actual.valor, x + 10, y + 25);
+          ctx.fillText(actual.direccion, x + 40, y + 25);
+
+          if (actual.siguiente) {
+            ctx.beginPath();
+            ctx.moveTo(x + nodeWidth, y + nodeHeight / 2);
+            ctx.lineTo(x + spacing, y + nodeHeight / 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x + spacing - 10, y + nodeHeight / 2 - 5);
+            ctx.lineTo(x + spacing, y + nodeHeight / 2);
+            ctx.lineTo(x + spacing - 10, y + nodeHeight / 2 + 5);
+            ctx.fill();
+          }
+
+          x += spacing;
+          actual = actual.siguiente;
+        }
+
+        // Mostrar null al final de la lista
+        ctx.fillText("null", x, y + 25);
+      }
+    }
+
+    const lista = new ListaEnlazada();
+
+    function insertAtBeginning() {
+      const valor = document.getElementById('value').value;
+      if (valor) lista.insertarInicio(valor);
+    }
+
+    function insertAtEnd() {
+      const valor = document.getElementById('value').value;
+      if (valor) lista.insertarFinal(valor);
+    }
+
+    function insertAtPosition() {
+      const valor = document.getElementById('value').value;
+      const pos = parseInt(document.getElementById('position').value);
+      if (valor && pos) lista.insertarEnPosicion(valor, pos);
+    }
+
+    function deleteAtPosition() {
+      const pos = parseInt(document.getElementById('position').value);
+      if (pos) lista.eliminarEnPosicion(pos);
+    }
+  </script>
+</body>
+</html>
