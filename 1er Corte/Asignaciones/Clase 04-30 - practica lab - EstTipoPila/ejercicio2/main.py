@@ -1,11 +1,4 @@
 # main.py
-'''
-proyecto_ordenador_pila/
-├── ordenador.py      # Clase con el metodo 'ordena'
-├── main.py           # Interfaz con menú para ingresar y ordenar pilas
-'''
-
-# main.py
 
 from ordenador import OrdenadorPila
 
