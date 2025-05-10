@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Pila basada en Lista Enlazada</title>
+  <style>
+    canvas { border: 1px solid black; margin-top: 20px; }
+    input, button { margin: 5px; }
+    #explicacion {
+      margin-top: 20px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      background-color: #eef;
+      padding: 10px;
+      border-left: 5px solid #3366cc;
+    }
+  </style>
+  <audio id="sound-push" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQgAAAAA"></audio>
+  <audio id="sound-pop" src="data:audio/wav;base64,UklGRkYAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YVcAAAAA"></audio>
+  <audio id="sound-peek" src="data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YWIAAAAA"></audio>
+  <audio id="sound-clear" src="data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQgAAAAA"></audio>
+</head>
+<body>
+  <h2>Pila Visual basada en Lista Enlazada</h2>
+  <input type="text" id="value" placeholder="Valor">
+  <button onclick="pushValue()">Insertar (Push)</button>
+  <button onclick="popValue()">Eliminar (Pop)</button>
+  <button onclick="peekValue()">Ver Tope (Peek)</button>
+  <button onclick="clearStack()">Vaciar</button>
+  <canvas id="canvas" width="1000" height="300"></canvas>
+  <div id="explicacion"></div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const nodeWidth = 60;
+    const nodeHeight = 40;
+    const spacing = 80;
+
+    function generarHex() {
+      return Math.floor(Math.random() * 0xFFFF).toString(16).padStart(4, '0');
+    }
+
+    function mostrarExplicacion(texto) {
+      document.getElementById("explicacion").innerText = texto;
+    }
+
+    function playSound(id) {
+      const sonido = document.getElementById(id);
+      if (sonido) {
+        sonido.currentTime = 0;
+        sonido.play();
+      }
+    }
+
+    class Nodo {
+      constructor(valor) {
+        this.valor = valor;
+        this.direccion = generarHex();
+        this.siguiente = null;
+      }
+    }
+
+    class Pila {
+      constructor() {
+        this.cima = null;
+        this.length = 0;
+      }
+
+      push(valor) {
+        const nuevo = new Nodo(valor);
+        nuevo.siguiente = this.cima;
+        this.cima = nuevo;
+        this.length++;
+        this.dibujar();
+        mostrarExplicacion(`Insertar (Push):\n1. Se crea nodo con valor '${valor}' y dirección ${nuevo.direccion}.\n2. El nuevo nodo apunta al anterior tope (${nuevo.siguiente ? nuevo.siguiente.direccion : 'null'}).\n3. El nuevo nodo se convierte en la cima de la pila.`);
+        playSound("sound-push");
+      }
+
+      pop() {
+        if (!this.cima) {
+          mostrarExplicacion("La pila está vacía. No se puede eliminar.");
+          return;
+        }
+        const eliminado = this.cima;
+        this.cima = this.cima.siguiente;
+        this.length--;
+        this.dibujar();
+        mostrarExplicacion(`Eliminar (Pop):\nNodo eliminado con valor '${eliminado.valor}' (${eliminado.direccion}).\nNuevo tope: ${this.cima ? this.cima.direccion : 'null'}.`);
+        playSound("sound-pop");
+      }
+
+      peek() {
+        if (!this.cima) {
+          mostrarExplicacion("La pila está vacía.");
+        } else {
+          mostrarExplicacion(`Ver Tope (Peek):\nEl valor en la cima es '${this.cima.valor}' (${this.cima.direccion}).`);
+        }
+        playSound("sound-peek");
+      }
+
+      vaciar() {
+        this.cima = null;
+        this.length = 0;
+        this.dibujar();
+        mostrarExplicacion("La pila ha sido vaciada.");
+        playSound("sound-clear");
+      }
+
+      dibujar() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let actual = this.cima;
+        let x = 100;
+        let y = 50;
+
+        while (actual) {
+          ctx.strokeRect(x, y, nodeWidth, nodeHeight);
+          ctx.fillText(actual.valor, x + 10, y + 25);
+          ctx.fillText(actual.direccion, x + 10, y + 38);
+
+          if (actual.siguiente) {
+            ctx.beginPath();
+            ctx.moveTo(x + nodeWidth / 2, y + nodeHeight);
+            ctx.lineTo(x + nodeWidth / 2, y + spacing);
+            ctx.stroke();
+          }
+          y += spacing;
+          actual = actual.siguiente;
+        }
+      }
+    }
+
+    const pila = new Pila();
+
+    function pushValue() {
+      const valor = document.getElementById("value").value;
+      if (valor) pila.push(valor);
+    }
+
+    function popValue() {
+      pila.pop();
+    }
+
+    function peekValue() {
+      pila.peek();
+    }
+
+    function clearStack() {
+      pila.vaciar();
+    }
+  </script>
+</body>
+</html>
